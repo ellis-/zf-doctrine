@@ -147,7 +147,7 @@ class ZFDoctrine_Core extends Doctrine_Core
 
         $loadedModels = array();
         foreach (self::getAllModelDirectories() AS $module => $modelDir) {
-            $moduleName = self::_formatModuleName($module);
+            $moduleName = $module; //self::_formatModuleName($module);
 
             if (!file_exists($modelDir)) {
                 continue;
