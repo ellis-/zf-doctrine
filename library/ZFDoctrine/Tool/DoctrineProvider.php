@@ -300,7 +300,7 @@ class ZFDoctrine_Tool_DoctrineProvider extends Zend_Tool_Project_Provider_Abstra
         $this->_print('Destination Directory: ' . $yamlDir);
     }
 
-    public function generateMigration($className=null, $dFromDatabase=false, $mFromModels=false)
+    public function generateMigration($className=null, $dFromDatabase=false, $mFromModels=false, $schemaDiff = false)
     {
 
         $this->_initDoctrineResource();
@@ -343,7 +343,7 @@ class ZFDoctrine_Tool_DoctrineProvider extends Zend_Tool_Project_Provider_Abstra
         {
             $this->_initDoctrineResource();
             $yamlSchemaPath = $this->_getYamlDirectoryPath();
-            $changes = Doctrine_Core::generateMigrationsFromDiff($migrationsPath, $yamlSchemaPath.'/../schema_mig_diff', $yamlSchemaPath);
+            $changes = Doctrine_Core::generateMigrationsFromDiff($migratePath, $yamlSchemaPath.'/../schema_mig_diff', $yamlSchemaPath);
 
             $this->_print('Migration complete.' . print_r($changes, true));
         }
