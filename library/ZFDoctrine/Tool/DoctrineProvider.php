@@ -339,6 +339,13 @@ class ZFDoctrine_Tool_DoctrineProvider extends Zend_Tool_Project_Provider_Abstra
             Doctrine_Core::generateMigrationsFromModels($migratePath, null);
 
             $this->_print('Generated migration classes from the model successfully.');
+        } else if($schemaDiff)
+        {
+            $this->_initDoctrineResource();
+            $yamlSchemaPath = $this->_getYamlDirectoryPath();
+            $changes = Doctrine_Core::generateMigrationsFromDiff($migrationsPath, $yamlSchemaPath.'/../schema_mig_diff', $yamlSchemaPath);
+
+            $this->_print('Migration complete.' . print_r($changes, true));
         }
     }
 
