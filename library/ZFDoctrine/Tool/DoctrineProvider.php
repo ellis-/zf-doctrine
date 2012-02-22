@@ -349,9 +349,12 @@ class ZFDoctrine_Tool_DoctrineProvider extends Zend_Tool_Project_Provider_Abstra
         $currentVersion = $this->getCurrentMigrationVersion();
 
         $migratePath = $this->_getMigrationsDirectoryPath();
-        $newVersion = Doctrine_Core::migrate($migratePath, $toVersion);
-
-        $this->_print('Migrated from version ' . $currentVersion . ' to ' . $newVersion);
+        try {
+            $newVersion = Doctrine_Core::migrate($migratePath, $toVersion);
+            $this->_print('Migrated from version ' . $currentVersion . ' to ' . $newVersion);
+        } catch (Exception $e) {
+            $this->_print($e->getMessage());
+        }
     }
 
     public function showMigration()
@@ -359,6 +362,7 @@ class ZFDoctrine_Tool_DoctrineProvider extends Zend_Tool_Project_Provider_Abstra
         $this->_initDoctrineResource();
 
         $this->_print('The current migration version is: ' . $this->getCurrentMigrationVersion());
+        $this->_print('The latest migration version is: ' . $this->getLatestMigrationVersion());
     }
 
     public function show()
@@ -389,6 +393,13 @@ class ZFDoctrine_Tool_DoctrineProvider extends Zend_Tool_Project_Provider_Abstra
         $migratePath = $this->_getMigrationsDirectoryPath();
         $migration = new Doctrine_Migration($migratePath);
         return $migration->getCurrentVersion();
+    }
+    
+    protected function getLatestMigrationVersion()
+    {
+        $migratePath = $this->_getMigrationsDirectoryPath();
+        $migration = new Doctrine_Migration($migratePath);
+        return $migration->getLatestVersion();
     }
 
     protected function _loadDoctrineModels()
