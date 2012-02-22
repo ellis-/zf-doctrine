@@ -106,9 +106,7 @@ class ZFDoctrine_Form_Model extends Zend_Form
         if($this->_adapter == null) {
             $this->setAdapter(new ZFDoctrine_Form_Model_Adapter_Doctrine());
         }
-
         $this->addElementPrefixPath('ZFDoctrine', 'ZFDoctrine');
-
         $this->_preGenerate();
         $this->_generateForm();
         $this->_postGenerate();

@@ -97,7 +97,6 @@ class ZFDoctrine_Auth_Adapter implements Zend_Auth_Adapter_Interface
      * @var array
      */
     protected $_authenticateResultInfo = null;
-    
     /**
      * $_resultRow - Results of database authentication query
      *
@@ -138,7 +137,6 @@ class ZFDoctrine_Auth_Adapter implements Zend_Auth_Adapter_Interface
             $this->setCredentialTreatment($credentialTreatment);
         }
     }
-    
     /**
      * setConnection() - set the connection to the database
      *
@@ -160,10 +158,8 @@ class ZFDoctrine_Auth_Adapter implements Zend_Auth_Adapter_Interface
     {
         if (null === $this->_conn &&
             null !== $this->_tableName) {
-            
             $this->_conn = Doctrine::getConnectionByTableName($this->_tableName);
         }
-        
         return $this->_conn;
     }
 
@@ -263,7 +259,6 @@ class ZFDoctrine_Auth_Adapter implements Zend_Auth_Adapter_Interface
         if (!$this->_resultRow) {
             return false;
         }
-        
         $returnObject = new stdClass();
 
         if (null !== $returnColumns) {
@@ -310,11 +305,9 @@ class ZFDoctrine_Auth_Adapter implements Zend_Auth_Adapter_Interface
         $this->_authenticateSetup();
         $dbSelect = $this->_authenticateCreateSelect();
         $resultIdentities = $this->_authenticateQuerySelect($dbSelect);
-        
         if ( ($authResult = $this->_authenticateValidateResultset($resultIdentities)) instanceof Zend_Auth_Result) {
             return $authResult;
         }
-        
         $authResult = $this->_authenticateValidateResult(array_shift($resultIdentities));
         return $authResult;
     }
@@ -329,7 +322,6 @@ class ZFDoctrine_Auth_Adapter implements Zend_Auth_Adapter_Interface
     protected function _authenticateSetup()
     {
         $exception = null;
-        
         if ($this->getConnection() === null) {
             $exception = 'A database connection was not set, nor could one be created.';
         } elseif ($this->_tableName == '') {
@@ -351,13 +343,11 @@ class ZFDoctrine_Auth_Adapter implements Zend_Auth_Adapter_Interface
             require_once 'Zend/Auth/Adapter/Exception.php';
             throw new Zend_Auth_Adapter_Exception($exception);
         }
-        
         $this->_authenticateResultInfo = array(
             'code'     => Zend_Auth_Result::FAILURE,
             'identity' => $this->_identity,
             'messages' => array()
             );
-            
         return true;
     }
 
@@ -373,7 +363,6 @@ class ZFDoctrine_Auth_Adapter implements Zend_Auth_Adapter_Interface
         if (empty($this->_credentialTreatment) || (strpos($this->_credentialTreatment, "?") === false)) {
             $this->_credentialTreatment = '?';
         }
-		
 		$dbSelect = Doctrine_Query::create($this->getConnection())
 					->from($this->_tableName)
 					->select('*, ('.$this->_credentialColumn.' = '.str_replace('?', 
@@ -432,7 +421,7 @@ class ZFDoctrine_Auth_Adapter implements Zend_Auth_Adapter_Interface
     }
 
     /**
-     * _authenticateValidateResult() - This method attempts to validate that the record in the 
+     * _authenticateValidateResult() - This method attempts to validate that the record in the
      * result set is indeed a record that matched the identity provided to this adapter.
      *
      * @param array $resultIdentity
@@ -453,7 +442,7 @@ class ZFDoctrine_Auth_Adapter implements Zend_Auth_Adapter_Interface
         $this->_authenticateResultInfo['messages'][] = 'Authentication successful.';
         return $this->_authenticateCreateAuthResult();
     }
-    
+
     /**
      * _authenticateCreateAuthResult() - This method creates a Zend_Auth_Result object
      * from the information that has been collected during the authenticate() attempt.
