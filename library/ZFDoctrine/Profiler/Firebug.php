@@ -96,13 +96,13 @@ class ZFDoctrine_Profiler_Firebug extends Doctrine_Connection_Profiler {
             $this->_message->setDestroy(false);
             $this->_totalElapsedTime += $arguments[0]->getElapsedSecs();
             if($arguments[0]->getName() == 'execute') {
-		$row = array($arguments[0]->getName(),
+            	$row = array($arguments[0]->getName(),
                         round($arguments[0]->getElapsedSecs(),5),
                         $arguments[0]->getQuery(),
                         ($params=$arguments[0]->getParams())?$params:null);
-		$this->_message->addRow($row);
+            	$this->_message->addRow($row);
 
-			$this->_queryCount = $this->_queryCount + 1;
+	        	$this->_queryCount = $this->_queryCount + 1;
 	        }
 
             $this->updateMessageLabel();
