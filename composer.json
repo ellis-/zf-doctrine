@@ -1,0 +1,15 @@
+{
+    "name": "lciolecki/zf-doctrine",
+    "author": "Benjamin Eberlei",
+    "description": "A Zend Framework 1.x and Doctrine 1.2 Integration",
+    "type": "library",
+    "keywords": ["zf1", "doctrine1"],
+    "require": {
+        "php": ">=5.3"
+    },
+    "autoload": {
+        "psr-0": {
+            "ZFDoctrine": "library"
+        }
+    }
+}
