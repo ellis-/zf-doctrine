@@ -129,6 +129,25 @@ class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource
             $conn->addListener(new $class(), $alias);
         }
     }
+    
+    /**
+     * Set connection record listeners
+     *
+     * @param   Doctrine_Connection_Common $conn
+     * @param   array $options
+     * @return  void
+     * @throws  Zend_Application_Resource_Exception
+     */
+    protected function _setConnectionRecordListeners(Doctrine_Connection_Common $conn, array $options)
+    {
+        foreach ($options as $alias => $class) {
+            if (!class_exists($class)) {
+                throw new Zend_Application_Resource_Exception("$class does not exist.");
+            }
+
+            $conn->addRecordListener(new $class(), $alias);
+        }
+    }
 
     /**
      * Retrieve a Doctrine_Cache instance
@@ -271,6 +290,10 @@ class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource
             if (array_key_exists('listeners', $value)) {
                 $this->_setConnectionListeners($conn, $value['listeners']);
             }
+            
+            if (array_key_exists('recordListeners', $value)) {
+                $this->_setConnectionRecordListeners($conn, $value['recordListeners']);
+            }
 
             $connections[$key] = $conn;
         }
@@ -357,7 +380,8 @@ class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource
 
         $manager = $this->_initManager();
         $connections = $this->_initConnections();
-
+        
+        //$this->getBootstrap()->getApplication()->getAutoloader()->pushAutoloader(array('Doctrine_Core', 'modelsAutoload'));
         return new ZFDoctrine_Registry($manager, $connections, $this->_paths, $this->_generateModelOptions);
     }
 }
