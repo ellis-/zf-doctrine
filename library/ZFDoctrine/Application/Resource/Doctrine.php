@@ -218,7 +218,8 @@ class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource
 
             case 'xcache':
                 return new Doctrine_Cache_Xcache();
-
+            case 'array':
+                return new Doctrine_Cache_Array();
             default:
                 throw new Zend_Application_Resource_Exception('Unsupported cache driver.');
         }
@@ -376,12 +377,10 @@ class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource
         if (!class_exists('Doctrine_Core')) {
             throw ZFDoctrine_DoctrineException::doctrineNotFound();
         }
-        spl_autoload_register(array('Doctrine_Core', 'autoload'));
 
         $manager = $this->_initManager();
         $connections = $this->_initConnections();
         
-        //$this->getBootstrap()->getApplication()->getAutoloader()->pushAutoloader(array('Doctrine_Core', 'modelsAutoload'));
         return new ZFDoctrine_Registry($manager, $connections, $this->_paths, $this->_generateModelOptions);
     }
 }
