@@ -380,7 +380,24 @@ class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource
 
         $manager = $this->_initManager();
         $connections = $this->_initConnections();
-        
+
+        foreach ($this->_paths as $name => $paths) {
+            $name = strtolower($name);
+            foreach ($paths as $path) {
+                switch ($name) {
+                    case 'models':
+                        Doctrine_Core::loadModels($path, Doctrine_Core::MODEL_LOADING_CONSERVATIVE);
+                        break;
+                    case 'sql':
+                    case 'migrations':
+                    case 'data_fixtures':
+                    default:
+                        break;
+                }
+            }
+        }
+
+        $this->getApplication()->getAutoloader()->pushAutoloader(array('Doctrine_Core', 'modelsAutoload'));
         return new ZFDoctrine_Registry($manager, $connections, $this->_paths, $this->_generateModelOptions);
     }
 }
