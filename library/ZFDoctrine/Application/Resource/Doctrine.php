@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ZFDoctrine
  *
@@ -10,7 +11,6 @@
  * obtain it through the world-wide-web, please send an email
  * to kontakt@beberlei.de so I can send you a copy immediately.
  */
-
 class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource_ResourceAbstract
 {
     /**
@@ -46,13 +46,7 @@ class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource
             $options = http_build_query($dsn['options']);
         }
 
-        return sprintf('%s://%s:%s@%s/%s?%s',
-            $dsn['adapter'],
-            $dsn['user'],
-            $dsn['pass'],
-            $dsn['hostspec'],
-            $dsn['database'],
-            $options);
+        return sprintf('%s://%s:%s@%s/%s?%s', $dsn['adapter'], $dsn['user'], $dsn['pass'], $dsn['hostspec'], $dsn['database'], $options);
     }
 
     /**
@@ -96,7 +90,8 @@ class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource
     }
 
     /**
-     *
+     * Set a new hydrators
+     * 
      * @param Doctrine_Configurable $object
      * @param array $attributes
      * @return void
@@ -129,7 +124,7 @@ class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource
             $conn->addListener(new $class(), $alias);
         }
     }
-    
+
     /**
      * Set connection record listeners
      *
@@ -162,8 +157,7 @@ class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource
             throw new Zend_Application_Resource_Exception('Undefined cache driver.');
         }
 
-        switch ($options['driver'])
-        {
+        switch ($options['driver']) {
             case 'apc':
                 return new Doctrine_Cache_Apc();
 
@@ -192,9 +186,7 @@ class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource
                     throw new Zend_Application_Resource_Exception("Invalid db cache table name.");
                 }
 
-                $dsn = (is_array($options['options']['dsn']))
-                    ? $this->_buildDsnFromArray($options['options']['dsn'])
-                    : $options['options']['dsn'];
+                $dsn = (is_array($options['options']['dsn'])) ? $this->_buildDsnFromArray($options['options']['dsn']) : $options['options']['dsn'];
 
                 $cacheConn = Doctrine_Manager::connection($dsn);
 
@@ -251,17 +243,30 @@ class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource
         return $this;
     }
 
+    /**
+     * Set generate models options
+     * 
+     * @param array $options
+     * @return \ZFDoctrine_Application_Resource_Doctrine
+     */
     public function setGenerateModels(array $options)
     {
         $this->_generateModelOptions = $options;
-        
+
         return $this;
     }
 
+    /**
+     * Method initialized connections 
+     * 
+     * @return array
+     * @throws Zend_Application_Resource_Exception
+     */
     protected function _initConnections()
     {
+        $current = null;
         $connections = array();
-        foreach($this->_connectionOptions as $key => $value) {
+        foreach ($this->_connectionOptions as $key => $value) {
             if (!is_array($value)) {
                 throw new Zend_Application_Resource_Exception("Invalid connection on $key.");
             }
@@ -274,12 +279,10 @@ class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource
                 throw new Zend_Application_Resource_Exception("Invalid DSN on $key.");
             }
 
-            $dsn = (is_array($value['dsn']))
-                ? $this->_buildDsnFromArray($value['dsn'])
-                : $value['dsn'];
+            $dsn = (is_array($value['dsn'])) ? $this->_buildDsnFromArray($value['dsn']) : $value['dsn'];
 
             $conn = Doctrine_Manager::connection($dsn, $key);
-            
+
             if (array_key_exists('charset', $value)) {
                 $conn->setCharset($value['charset']);
             }
@@ -291,25 +294,37 @@ class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource
             if (array_key_exists('listeners', $value)) {
                 $this->_setConnectionListeners($conn, $value['listeners']);
             }
-            
+
             if (array_key_exists('recordListeners', $value)) {
                 $this->_setConnectionRecordListeners($conn, $value['recordListeners']);
+            }
+
+            if (array_key_exists('isDefaultConnection', $value) && true == $value['isDefaultConnection']) {
+                $current = $key;
             }
 
             $connections[$key] = $conn;
         }
 
+        if (null === $current) {
+            $current = end($connections);
+            reset($connections);
+        }
+
+        Doctrine_Manager::getInstance()->setCurrentConnection($current);
         return $connections;
     }
 
     /**
+     * Initialize doctrine manager
+     * 
      * @return Doctrine_Manager
      */
     protected function _initManager()
     {
         $manager = Doctrine_Manager::getInstance();
         $manager->setAttribute(Doctrine_Core::ATTR_MODEL_LOADING, ZFDoctrine_Core::MODEL_LOADING_ZEND); // default
-        
+
 
         if (array_key_exists('hydrators', $this->_managerOptions)) {
             $this->_setHydrators($manager, $this->_managerOptions['hydrators']);
@@ -349,6 +364,17 @@ class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource
                     }
 
                     $this->_paths[$key][$subKey] = $path;
+
+                    switch ($key) {
+                        case 'models':
+                            Doctrine_Core::loadModels($path, Doctrine_Core::MODEL_LOADING_CONSERVATIVE);
+                            break;
+                        case 'sql':
+                        case 'migrations':
+                        case 'data_fixtures':
+                        default:
+                            break;
+                    }
                 }
             }
         }
@@ -381,23 +407,6 @@ class ZFDoctrine_Application_Resource_Doctrine extends Zend_Application_Resource
         $manager = $this->_initManager();
         $connections = $this->_initConnections();
 
-        foreach ($this->_paths as $name => $paths) {
-            $name = strtolower($name);
-            foreach ($paths as $path) {
-                switch ($name) {
-                    case 'models':
-                        Doctrine_Core::loadModels($path, Doctrine_Core::MODEL_LOADING_CONSERVATIVE);
-                        break;
-                    case 'sql':
-                    case 'migrations':
-                    case 'data_fixtures':
-                    default:
-                        break;
-                }
-            }
-        }
-
-        $this->getApplication()->getAutoloader()->pushAutoloader(array('Doctrine_Core', 'modelsAutoload'));
         return new ZFDoctrine_Registry($manager, $connections, $this->_paths, $this->_generateModelOptions);
     }
 }
